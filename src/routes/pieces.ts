@@ -5,6 +5,7 @@ import {
 	Router,
 } from "express";
 import { APIError } from "../middleware/errorHandler";
+import { validateUUID } from "../middleware/validate";
 import {
 	getCollections,
 	getGlazes,
@@ -46,7 +47,7 @@ router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { id } = req.params;
 
-		// TODO: Validate UUID format
+		validateUUID(id, "piece ID");
 		const piece = await getPieceById(id);
 
 		if (!piece) {
