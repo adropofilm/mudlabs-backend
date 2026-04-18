@@ -25,9 +25,7 @@ export async function getPieceById(id: string): Promise<Piece | null> {
 
 export async function getCollections(): Promise<string[]> {
 	const pieces = await prisma.piece.findMany({ select: { collection: true } });
-	return Array.from(
-		new Set(pieces.map((p: { collection: string }) => p.collection)),
-	).sort();
+	return Array.from<string>(new Set(pieces.map((p) => p.collection))).sort();
 }
 
 export async function getGlazes(): Promise<
