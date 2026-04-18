@@ -5,6 +5,11 @@ import {
 	Router,
 } from "express";
 import { APIError } from "../middleware/errorHandler";
+import {
+	validateEmail,
+	validateName,
+	validatePassword,
+} from "../middleware/validate";
 import { login, register } from "../services/authService";
 
 const router = Router();
@@ -21,10 +26,12 @@ router.post(
 		try {
 			const { email, password, name } = req.body;
 
-			// TODO: Validate input (email format, password strength, name length)
 			if (!email || !password || !name) {
 				throw new APIError("Missing required fields", 400);
 			}
+			validateEmail(email);
+			validatePassword(password);
+			validateName(name);
 
 			const result = await register(email, password, name);
 			res.status(201).json(result);
@@ -46,10 +53,10 @@ router.post(
 		try {
 			const { email, password } = req.body;
 
-			// TODO: Validate input
 			if (!email || !password) {
 				throw new APIError("Missing email or password", 400);
 			}
+			validateEmail(email);
 
 			const result = await login(email, password);
 			res.json(result);

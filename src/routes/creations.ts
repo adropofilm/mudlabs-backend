@@ -6,6 +6,7 @@ import {
 } from "express";
 import { authMiddleware } from "../middleware/auth";
 import { APIError } from "../middleware/errorHandler";
+import { validateUUID } from "../middleware/validate";
 import {
 	createCreation,
 	deleteCreation,
@@ -29,7 +30,6 @@ router.post(
 			const { name, intentDescription, config } = req.body;
 			const userId = req.userId as UUID;
 
-			// TODO: Validate input
 			if (!name || !config) {
 				throw new APIError("Missing required fields", 400);
 			}
@@ -87,6 +87,7 @@ router.delete(
 			const userId = req.userId as UUID;
 
 			// TODO: Verify ownership before deleting
+			validateUUID(id, "creation ID");
 			const success = await deleteCreation(id as UUID, userId);
 
 			if (!success) {

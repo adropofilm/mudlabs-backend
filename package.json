@@ -13,7 +13,8 @@
     "lint": "biome check src/",
     "lint:fix": "biome check --write src/",
     "format": "biome format --write src/",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
@@ -37,6 +38,7 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20.19.39",
+    "husky": "^9.1.7",
     "jest": "^30.3.0",
     "nodemon": "^3.0.2",
     "ts-jest": "^29.4.9",
