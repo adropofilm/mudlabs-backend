@@ -14,19 +14,25 @@ Make sure you have these installed before setting up:
 
 ---
 
-## Setup
+## Quickstart
 
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Copy env file and fill in your values
+# 2. Copy the env file and fill in your values
 cp .env.example .env
 
-# 3. Run database migrations
+# 3. Generate the Prisma client
+npx prisma generate
+
+# 4. Run database migrations
 npx prisma migrate deploy
 
-# 4. Start dev server
+# 5. Seed the database with pottery pieces
+npm run db:seed
+
+# 6. Start the dev server
 npm run dev
 ```
 
@@ -74,6 +80,12 @@ src/
 
 ---
 
+## Hosting
+
+The API is deployed on **Vercel**. The database runs on **Neon** (serverless Postgres). Piece images are stored and served via **Cloudinary**.
+
+---
+
 ## What's Done
 
 - JWT auth — register, login, protected routes
@@ -87,7 +99,6 @@ src/
 
 - **OpenAI tour guide** — service is scaffolded, API call not wired up yet
 - **Input validation** — email format, password strength, UUID checks
-- **Seed data** — no pottery pieces in the DB yet, `Piece` table is empty
 - **Swagger / API docs** — not set up yet
 
 ---
