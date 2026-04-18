@@ -1,34 +1,36 @@
+import OpenAI from "openai";
 import type { TourGuideMessage, TourGuideResponse } from "../types";
 
-/**
- * Ask the tour guide a question
- * TODO: Integrate with OpenAI API
- */
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 export async function askTourGuide(
 	message: string,
-	_conversationHistory?: TourGuideMessage[],
+	conversationHistory?: TourGuideMessage[],
 ): Promise<TourGuideResponse> {
-	// TODO: Build system prompt with pottery gallery context
-	// TODO: Call OpenAI API with message + history
-	// TODO: Return response
+	const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+		{ role: "system", content: buildSystemPrompt() },
+		...(conversationHistory ?? []).map((m) => ({
+			role: m.role as "user" | "assistant",
+			content: m.content,
+		})),
+		{ role: "user", content: message },
+	];
 
-	// For now, return a placeholder
-	const response: TourGuideResponse = {
-		response: `Tour guide response to: "${message}"`,
+	const completion = await openai.chat.completions.create({
+		model: "gpt-4o-mini",
+		messages,
+	});
+
+	return {
+		response: completion.choices[0].message.content ?? "",
 		timestamp: new Date(),
 	};
-
-	return response;
 }
 
-/**
- * Build system prompt for tour guide
- * Includes pottery terminology, gallery info, etc.
- */
-function _buildSystemPrompt(): string {
+function buildSystemPrompt(): string {
 	return `You are a friendly pottery expert tour guide for the MudLab gallery.
 Your role is to help visitors understand pottery, glazes, techniques, and our collection.
-Always explain pottery terms in beginner-friendly language.
+Always explain pottery terms in concise beginner-friendly language.
 Never use jargon without explaining it.
 Be encouraging and help people learn about ceramic art.
 
