@@ -9,4 +9,7 @@ dist/
 .idea/
 .vscode/
 
+# Claude Code
+.claude/
+
 /src/generated/prisma
