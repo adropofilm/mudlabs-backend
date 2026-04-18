@@ -21,10 +21,35 @@ import {
 const router = Router();
 
 /**
- * POST /auth/register
- * Register new user
- * Body: { email: string, password: string, name: string }
- * Response: { token, user, expiresIn }
+ * @openapi
+ * /auth/register:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password, name]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string, minLength: 8 }
+ *               name: { type: string, minLength: 2 }
+ *     responses:
+ *       201:
+ *         description: User registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: Email already registered
+ *       429:
+ *         description: Too many requests
  */
 router.post(
 	"/register",
@@ -49,10 +74,32 @@ router.post(
 );
 
 /**
- * POST /auth/login
- * Login user
- * Body: { email: string, password: string }
- * Response: { token, user, expiresIn }
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Log in
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string }
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       401:
+ *         description: Invalid email or password
+ *       429:
+ *         description: Too many requests
  */
 router.post(
 	"/login",
@@ -75,10 +122,32 @@ router.post(
 );
 
 /**
- * POST /auth/refresh
- * Get a new access token using a refresh token
- * Body: { refreshToken: string }
- * Response: { accessToken, expiresIn }
+ * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Get a new access token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     responses:
+ *       200:
+ *         description: New access token issued
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken: { type: string }
+ *                 expiresIn: { type: number }
+ *       401:
+ *         description: Invalid or expired refresh token
  */
 router.post(
 	"/refresh",
@@ -96,10 +165,29 @@ router.post(
 );
 
 /**
- * POST /auth/logout
- * Invalidate a refresh token
- * Body: { refreshToken: string }
- * Response: { success: true }
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Invalidate a refresh token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     responses:
+ *       200:
+ *         description: Logged out
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
  */
 router.post(
 	"/logout",

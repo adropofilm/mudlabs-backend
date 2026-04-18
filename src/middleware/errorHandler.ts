@@ -27,6 +27,17 @@ export const errorHandler = (
 		return res.status(error.statusCode).json(response);
 	}
 
+	// express-openapi-validator errors have a status property
+	const httpError = error as { status?: number; message: string };
+	if (httpError.status && httpError.status < 500) {
+		const response: ErrorResponse = {
+			error: "Validation Error",
+			message: httpError.message,
+			statusCode: httpError.status,
+		};
+		return res.status(httpError.status).json(response);
+	}
+
 	// Generic error
 	const response: ErrorResponse = {
 		error: "Internal Server Error",
