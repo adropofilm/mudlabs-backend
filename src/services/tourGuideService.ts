@@ -7,14 +7,21 @@ export async function askTourGuide(
 	message: string,
 	conversationHistory?: TourGuideMessage[],
 ): Promise<TourGuideResponse> {
-	const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-		{ role: "system", content: buildSystemPrompt() },
-		...(conversationHistory ?? []).map((m) => ({
-			role: m.role as "user" | "assistant",
-			content: m.content,
-		})),
-		{ role: "user", content: message },
-	];
+	const systemMessage: OpenAI.Chat.ChatCompletionMessageParam = {
+		role: "system",
+		content: buildSystemPrompt(),
+	};
+
+	const historyMessages: OpenAI.Chat.ChatCompletionMessageParam[] = (
+		conversationHistory ?? []
+	).map(({ role, content }) => ({ role, content }));
+
+	const userMessage: OpenAI.Chat.ChatCompletionMessageParam = {
+		role: "user",
+		content: message,
+	};
+
+	const messages = [systemMessage, ...historyMessages, userMessage];
 
 	const completion = await openai.chat.completions.create({
 		model: "gpt-4o-mini",
