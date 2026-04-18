@@ -1,5 +1,5 @@
-import { Piece } from '../types'
-import { readDB } from '../db/helpers'
+import { Piece, UUID } from '../types'
+import prisma from '../db/client'
 
 interface FilterOptions {
   collection?: string
@@ -7,50 +7,28 @@ interface FilterOptions {
   type?: string
 }
 
-/**
- * Get all pieces with optional filtering
- */
 export async function getPieces(filters: FilterOptions): Promise<Piece[]> {
-  let pieces = await readDB<Piece>('pieces')
-
-  // TODO: Apply filters
-  if (filters.collection) {
-    pieces = pieces.filter((p) => p.collection === filters.collection)
-  }
-
-  if (filters.glaze) {
-    pieces = pieces.filter((p) => p.glaze === filters.glaze)
-  }
-
-  if (filters.type) {
-    pieces = pieces.filter((p) => p.type === filters.type)
-  }
-
-  return pieces
+  const pieces = await prisma.piece.findMany({
+    where: {
+      ...(filters.collection && { collection: filters.collection }),
+      ...(filters.glaze && { glaze: filters.glaze }),
+      ...(filters.type && { type: filters.type }),
+    },
+  })
+  return pieces as Piece[]
 }
 
-/**
- * Get single piece by ID
- */
-export async function getPieceById(id: string): Promise<Piece | undefined> {
-  const pieces = await readDB<Piece>('pieces')
-  return pieces.find((p) => p.id === id)
+export async function getPieceById(id: string): Promise<Piece | null> {
+  const piece = await prisma.piece.findUnique({ where: { id } })
+  return piece as Piece | null
 }
 
-/**
- * Get all collections
- */
 export async function getCollections(): Promise<string[]> {
-  const pieces = await readDB<Piece>('pieces')
-  const collections = new Set(pieces.map((p) => p.collection))
-  return Array.from(collections).sort()
+  const pieces = await prisma.piece.findMany({ select: { collection: true } })
+  return [...new Set(pieces.map((p: { collection: string }) => p.collection))].sort()
 }
 
-/**
- * Get all glazes with descriptions
- */
 export async function getGlazes(): Promise<Array<{ name: string; description: string }>> {
-  // TODO: Define pottery glaze options
   return [
     { name: 'matte', description: 'Non-shiny, velvety finish' },
     { name: 'glossy', description: 'Shiny, reflective surface' },
