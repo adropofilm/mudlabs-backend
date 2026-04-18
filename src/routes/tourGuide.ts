@@ -5,8 +5,8 @@ import {
 	Router,
 } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { tourGuideLimiter } from "../middleware/rateLimit";
 import { APIError } from "../middleware/errorHandler";
+import { tourGuideLimiter } from "../middleware/rateLimit";
 import { askTourGuide } from "../services/tourGuideService";
 import type { TourGuideRequest } from "../types";
 
