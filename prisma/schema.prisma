@@ -1,0 +1,37 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  creations    Creation[]
+}
+
+model Piece {
+  id          String  @id @default(uuid())
+  name        String
+  collection  String
+  glaze       String
+  color       String
+  type        String
+  description String
+  photoUrl    String
+}
+
+model Creation {
+  id                String   @id @default(uuid())
+  userId            String
+  name              String
+  intentDescription String?
+  config            Json
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id])
+}
