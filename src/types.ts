@@ -52,9 +52,10 @@ export interface Creation {
 
 // ============ AUTH ============
 export interface AuthResponse {
-	token: string; // JWT token
+	accessToken: string;
+	refreshToken: string;
 	user: UserPublic;
-	expiresIn: number; // seconds (604800 = 7 days)
+	expiresIn: number; // seconds (900 = 15 min)
 }
 
 export interface JWTPayload {

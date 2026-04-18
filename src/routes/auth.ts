@@ -10,7 +10,12 @@ import {
 	validateName,
 	validatePassword,
 } from "../middleware/validate";
-import { login, register } from "../services/authService";
+import {
+	login,
+	logout,
+	refreshAccessToken,
+	register,
+} from "../services/authService";
 
 const router = Router();
 
@@ -60,6 +65,48 @@ router.post(
 
 			const result = await login(email, password);
 			res.json(result);
+		} catch (error) {
+			next(error);
+		}
+	},
+);
+
+/**
+ * POST /auth/refresh
+ * Get a new access token using a refresh token
+ * Body: { refreshToken: string }
+ * Response: { accessToken, expiresIn }
+ */
+router.post(
+	"/refresh",
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { refreshToken } = req.body;
+			if (!refreshToken) throw new APIError("Missing refresh token", 400);
+
+			const result = await refreshAccessToken(refreshToken);
+			res.json(result);
+		} catch (error) {
+			next(error);
+		}
+	},
+);
+
+/**
+ * POST /auth/logout
+ * Invalidate a refresh token
+ * Body: { refreshToken: string }
+ * Response: { success: true }
+ */
+router.post(
+	"/logout",
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { refreshToken } = req.body;
+			if (!refreshToken) throw new APIError("Missing refresh token", 400);
+
+			await logout(refreshToken);
+			res.json({ success: true });
 		} catch (error) {
 			next(error);
 		}
