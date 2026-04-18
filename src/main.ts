@@ -36,7 +36,3 @@ app.use(errorHandler);
 app.listen(PORT, () => {
 	console.log(`🏺 MudLab API running on http://localhost:${PORT}`);
 });
-
-export { api } from "./client";
-// Export types for frontend
-export * from "./types";
