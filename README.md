@@ -1,125 +1,36 @@
-# MudLab Backend Scaffold
+# MudLab Backend
 
-Complete Express + TypeScript backend scaffold with JWT authentication, ready for implementation.
+API for MudLab — a pottery gallery app where users can browse handmade ceramic pieces, create custom ones, and chat with an AI tour guide that explains pottery in plain language.
+
+---
+
+## Prerequisites
+
+Make sure you have these installed before setting up:
+
+- [Node.js](https://nodejs.org/) v18+
+- [PostgreSQL](https://www.postgresql.org/) (running locally or remote)
+- npm
+
+---
 
 ## Setup
 
 ```bash
-# Copy .env.example to .env and fill in values
-cp .env.example .env
-
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Run in development
+# 2. Copy env file and fill in your values
+cp .env.example .env
+
+# 3. Run database migrations
+npx prisma migrate deploy
+
+# 4. Start dev server
 npm run dev
-
-# Build for production
-npm build
-npm start
 ```
 
-## What's Included
-
-✅ **Structure:** Organized folders for routes, services, middleware, database
-✅ **Types:** All TypeScript interfaces defined (src/types.ts)
-✅ **Routes:** All 10 endpoints scaffolded with TODO comments
-✅ **Auth:** JWT + bcrypt setup, authMiddleware, login/register routes
-✅ **Database:** JSON file helpers (src/db/helpers.ts)
-✅ **Error Handling:** Consistent error responses, custom APIError class
-✅ **Frontend Export:** Axios client with interceptors (src/client.ts)
-
-## What Needs Implementation
-
-### High Priority
-
-**1. Database Files** (src/db/data/)
-- `pieces.json` — Pre-populate with gallery pottery pieces
-- `users.json` — Empty at start
-- `creations.json` — Empty at start
-
-Example pieces.json structure:
-```json
-[
-  {
-    "id": "uuid-here",
-    "name": "Sage Bowl",
-    "collection": "minimalist",
-    "glaze": "matte",
-    "color": "sage",
-    "type": "bowl",
-    "description": "Handmade ceramic bowl...",
-    "photoUrl": "https://..."
-  }
-]
-```
-
-**2. Input Validation** (src/routes/)
-- Email format validation
-- Password strength validation (min 8 chars, etc.)
-- UUID format validation
-- Request body validation
-
-**3. OpenAI Integration** (src/services/tourGuideService.ts)
-- Call OpenAI API with conversation history
-- Build dynamic system prompt with gallery context
-- Handle streaming responses
-
-### Medium Priority
-
-**4. Filtering** (src/services/pieceService.ts)
-- Implement collection/glaze/type filtering
-
-**5. Ownership Verification** (src/routes/creations.ts)
-- Verify user owns creation before delete
-- Handle admin access if needed
-
-**6. Error Messages**
-- Make error messages more helpful
-- Add specific validation error details
-
-## File Structure
-
-```
-mudlab-backend-scaffold/
-├── src/
-│   ├── main.ts                 # Express server setup
-│   ├── types.ts                # All TypeScript interfaces (DONE ✅)
-│   ├── client.ts               # Axios client for frontend (DONE ✅)
-│   ├── middleware/
-│   │   ├── auth.ts             # JWT verification (DONE ✅)
-│   │   └── errorHandler.ts     # Error handling (DONE ✅)
-│   ├── routes/
-│   │   ├── auth.ts             # POST /auth/login, /auth/register (SCAFFOLD ⚠️)
-│   │   ├── pieces.ts           # GET /pieces, /pieces/:id (SCAFFOLD ⚠️)
-│   │   ├── creations.ts        # POST/GET/DELETE /creations (SCAFFOLD ⚠️)
-│   │   └── tourGuide.ts        # POST /tour-guide/ask (SCAFFOLD ⚠️)
-│   ├── services/
-│   │   ├── authService.ts      # JWT + bcrypt logic (DONE ✅)
-│   │   ├── pieceService.ts     # Gallery queries (SCAFFOLD ⚠️)
-│   │   ├── creationService.ts  # Creation CRUD (SCAFFOLD ⚠️)
-│   │   └── tourGuideService.ts # OpenAI integration (SCAFFOLD ⚠️)
-│   └── db/
-│       ├── helpers.ts          # Read/write JSON files (DONE ✅)
-│       └── data/
-│           ├── pieces.json     # TO POPULATE
-│           ├── users.json      # Created at runtime
-│           └── creations.json  # Created at runtime
-├── package.json                # (DONE ✅)
-├── tsconfig.json               # (DONE ✅)
-├── .env.example                # (DONE ✅)
-└── README.md                   # (DONE ✅)
-```
-
-## Next Steps
-
-1. **Copy this scaffold** to mudlab-backend repo
-2. **Create pieces.json** with pre-populated pottery pieces
-3. **Implement TODO comments** in routes and services
-4. **Add input validation** in all routes
-5. **Connect OpenAI API** for tour guide
-6. **Test endpoints** with Postman/Insomnia
-7. **Publish to npm** as @mudlab/backend once working
+---
 
 ## Environment Variables
 
@@ -128,36 +39,73 @@ JWT_SECRET=your-secret-key-min-32-chars
 JWT_EXPIRES_IN=7d
 API_PORT=3000
 API_URL=http://localhost:3000
-OPENAI_API_KEY=sk-your-key
+DATABASE_URL=postgresql://user@localhost:5432/mudlabs
+OPENAI_API_KEY=sk-your-key-here
 NODE_ENV=development
 ```
 
-## Key Design Decisions
+---
 
-- **Stateless JWT Auth** — No session storage, tokens are verified on each request
-- **JSON Database** — Simple and fast for MVP, can upgrade to PostgreSQL later
-- **Structured Errors** — All errors follow consistent { error, message, statusCode } format
-- **Frontend Export** — Backend exports types and axios client for frontend to use
+## Architecture
 
-## Testing Endpoints
+Express + TypeScript API with a PostgreSQL database managed via Prisma ORM.
 
-```bash
-# Register
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@test.com","password":"password123","name":"User"}'
-
-# Login
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@test.com","password":"password123"}'
-
-# Get pieces
-curl http://localhost:3000/pieces
-
-# Get protected route (requires token)
-curl http://localhost:3000/users/user-id/creations \
-  -H "Authorization: Bearer eyJ..."
+```
+src/
+├── main.ts                  # Server entry point, route mounting
+├── types.ts                 # Shared TypeScript interfaces
+├── client.ts                # Axios client (for frontend consumption)
+├── middleware/
+│   ├── auth.ts              # JWT verification middleware
+│   └── errorHandler.ts      # Global error handler
+├── routes/
+│   ├── auth.ts              # POST /auth/register, /auth/login
+│   ├── pieces.ts            # GET /pieces, /pieces/:id
+│   ├── creations.ts         # POST/GET/DELETE /creations
+│   └── tourGuide.ts         # POST /tour-guide/ask
+├── services/
+│   ├── authService.ts       # Register, login, JWT generation
+│   ├── pieceService.ts      # Gallery queries and filtering
+│   ├── creationService.ts   # Custom piece CRUD
+│   └── tourGuideService.ts  # OpenAI integration (in progress)
+└── db/
+    └── client.ts            # Prisma client instance
 ```
 
-Good luck! 🏺
+---
+
+## What's Done
+
+- JWT auth — register, login, protected routes
+- Prisma schema + initial migration
+- PostgreSQL connected via Prisma ORM
+- All CRUD for creations (create, list, delete with ownership check)
+- Piece filtering by collection, glaze, and type
+- Global error handling with consistent response shape
+
+## What's Pending
+
+- **OpenAI tour guide** — service is scaffolded, API call not wired up yet
+- **Input validation** — email format, password strength, UUID checks
+- **Seed data** — no pottery pieces in the DB yet, `Piece` table is empty
+- **Swagger / API docs** — not set up yet
+
+---
+
+## Endpoints
+
+```
+POST   /auth/register
+POST   /auth/login
+
+GET    /pieces
+GET    /pieces/:id
+
+POST   /creations          (auth required)
+GET    /creations          (auth required)
+DELETE /creations/:id      (auth required)
+
+POST   /tour-guide/ask     (auth required)
+
+GET    /health
+```
