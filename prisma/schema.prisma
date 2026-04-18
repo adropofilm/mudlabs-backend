@@ -7,12 +7,22 @@ datasource db {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  name         String
-  passwordHash String
-  createdAt    DateTime   @default(now())
-  creations    Creation[]
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  creations     Creation[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Piece {
