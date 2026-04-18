@@ -5,6 +5,7 @@ import {
 	Router,
 } from "express";
 import { authMiddleware } from "../middleware/auth";
+import { tourGuideLimiter } from "../middleware/rateLimit";
 import { APIError } from "../middleware/errorHandler";
 import { askTourGuide } from "../services/tourGuideService";
 import type { TourGuideRequest } from "../types";
@@ -20,6 +21,7 @@ const router = Router();
 router.post(
 	"/ask",
 	authMiddleware,
+	tourGuideLimiter,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { message, conversationHistory } = req.body as TourGuideRequest;

@@ -5,6 +5,7 @@ import {
 	Router,
 } from "express";
 import { APIError } from "../middleware/errorHandler";
+import { authLimiter } from "../middleware/rateLimit";
 import {
 	validateEmail,
 	validateName,
@@ -27,6 +28,7 @@ const router = Router();
  */
 router.post(
 	"/register",
+	authLimiter,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { email, password, name } = req.body;
@@ -54,6 +56,7 @@ router.post(
  */
 router.post(
 	"/login",
+	authLimiter,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { email, password } = req.body;
