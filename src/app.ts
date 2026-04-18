@@ -1,6 +1,9 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import * as OpenApiValidator from "express-openapi-validator";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger";
 import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./routes/auth";
 import creationRoutes from "./routes/creations";
@@ -14,10 +17,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(
+	OpenApiValidator.middleware({
+		apiSpec: swaggerSpec as never,
+		validateRequests: true,
+		validateResponses: false,
+		// Auth is handled by authMiddleware which verifies the JWT. The validator
+		// only checks header presence, which is redundant and weaker
+		validateSecurity: false,
+	}),
+);
+
 app.use("/auth", authRoutes);
 app.use("/pieces", pieceRoutes);
 app.use("/creations", creationRoutes);
 app.use("/tour-guide", tourGuideRoutes);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/health", (_req, res) => {
 	res.json({ status: "OK", timestamp: new Date() });

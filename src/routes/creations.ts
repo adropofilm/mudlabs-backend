@@ -17,10 +17,35 @@ import type { UUID } from "../types";
 const router = Router();
 
 /**
- * POST /creations
- * Create new custom piece (requires auth)
- * Body: { name, intentDescription, config }
- * Response: Creation
+ * @openapi
+ * /creations:
+ *   post:
+ *     tags: [Creations]
+ *     summary: Create a custom piece
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, config]
+ *             properties:
+ *               name: { type: string }
+ *               intentDescription: { type: string }
+ *               config: { type: object }
+ *     responses:
+ *       201:
+ *         description: Creation created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Creation'
+ *       400:
+ *         description: Missing required fields
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
 	"/",
@@ -48,9 +73,31 @@ router.post(
 );
 
 /**
- * GET /users/:userId/creations
- * Get all creations for a user (requires auth)
- * Response: Creation[]
+ * @openapi
+ * /creations/users/{userId}:
+ *   get:
+ *     tags: [Creations]
+ *     summary: Get all creations for a user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: List of creations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Creation'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  */
 router.get(
 	"/users/:userId",
@@ -60,7 +107,6 @@ router.get(
 			const { userId } = req.params;
 			const currentUserId = req.userId;
 
-			// TODO: Check if user is requesting their own creations or is admin
 			if (userId !== currentUserId) {
 				throw new APIError("Forbidden", 403);
 			}
@@ -74,9 +120,31 @@ router.get(
 );
 
 /**
- * DELETE /creations/:id
- * Delete a creation (requires auth, must be owner)
- * Response: { success: boolean }
+ * @openapi
+ * /creations/{id}:
+ *   delete:
+ *     tags: [Creations]
+ *     summary: Delete a creation
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Creation not found or unauthorized
  */
 router.delete(
 	"/:id",
@@ -86,7 +154,6 @@ router.delete(
 			const { id } = req.params;
 			const userId = req.userId as UUID;
 
-			// TODO: Verify ownership before deleting
 			validateUUID(id, "creation ID");
 			const success = await deleteCreation(id as UUID, userId);
 
