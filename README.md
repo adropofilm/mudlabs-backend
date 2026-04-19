@@ -1,6 +1,6 @@
 # MudLab Backend
 
-API for MudLab — a pottery gallery app where users can browse handmade ceramic pieces, create custom ones, and chat with an AI tour guide that explains pottery in plain language.
+API for MudLab, an interactive pottery gallery where users can browse handmade ceramic pieces, create custom ones, and chat with an AI tour guide that explains pottery in plain language.
 
 ---
 
