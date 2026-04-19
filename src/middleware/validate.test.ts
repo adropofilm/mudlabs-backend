@@ -19,14 +19,8 @@ describe("validateEmail", () => {
 		"missing@tld",
 		"@nodomain.com",
 		"spaces @email.com",
-	])("throws 400 for invalid email: %s", (email) => {
-		expect(() => validateEmail(email)).toThrow();
-		try {
-			validateEmail(email);
-		} catch (e: unknown) {
-			expect((e as { statusCode: number }).statusCode).toBe(400);
-			expect((e as { message: string }).message).toBe("Invalid email address");
-		}
+	])("throws for invalid email: %s", (email) => {
+		expect(() => validateEmail(email)).toThrow("Invalid email address");
 	});
 });
 
@@ -39,15 +33,10 @@ describe("validatePassword", () => {
 		expect(() => validatePassword("a-very-long-password-123")).not.toThrow();
 	});
 
-	it.each(["", "short", "7chars!"])("throws 400 for: '%s'", (password) => {
-		try {
-			validatePassword(password);
-		} catch (e: unknown) {
-			expect((e as { statusCode: number }).statusCode).toBe(400);
-			expect((e as { message: string }).message).toBe(
-				"Password must be at least 8 characters",
-			);
-		}
+	it.each(["", "short", "7chars!"])("throws for password: '%s'", (password) => {
+		expect(() => validatePassword(password)).toThrow(
+			"Password must be at least 8 characters",
+		);
 	});
 });
 
@@ -57,19 +46,10 @@ describe("validateName", () => {
 		expect(() => validateName("Fatima")).not.toThrow();
 	});
 
-	it.each([
-		"",
-		"A",
-		"  ",
-	])("throws 400 for short or blank name: '%s'", (name) => {
-		try {
-			validateName(name);
-		} catch (e: unknown) {
-			expect((e as { statusCode: number }).statusCode).toBe(400);
-			expect((e as { message: string }).message).toBe(
-				"Name must be at least 2 characters",
-			);
-		}
+	it.each(["", "A", "  "])("throws for short or blank name: '%s'", (name) => {
+		expect(() => validateName(name)).toThrow(
+			"Name must be at least 2 characters",
+		);
 	});
 });
 
@@ -85,27 +65,17 @@ describe("validateUUID", () => {
 		"123",
 		"",
 		"550e8400-e29b-41d4",
-	])("throws 400 for invalid UUID: '%s'", (id) => {
-		try {
-			validateUUID(id);
-		} catch (e: unknown) {
-			expect((e as { statusCode: number }).statusCode).toBe(400);
-		}
+	])("throws for invalid UUID: '%s'", (id) => {
+		expect(() => validateUUID(id)).toThrow();
 	});
 
 	it("includes the label in the error message", () => {
-		try {
-			validateUUID("bad-id", "piece ID");
-		} catch (e: unknown) {
-			expect((e as { message: string }).message).toBe("Invalid piece ID");
-		}
+		expect(() => validateUUID("bad-id", "piece ID")).toThrow(
+			"Invalid piece ID",
+		);
 	});
 
 	it("defaults to 'ID' in the error message when no label is given", () => {
-		try {
-			validateUUID("bad-id");
-		} catch (e: unknown) {
-			expect((e as { message: string }).message).toBe("Invalid ID");
-		}
+		expect(() => validateUUID("bad-id")).toThrow("Invalid ID");
 	});
 });

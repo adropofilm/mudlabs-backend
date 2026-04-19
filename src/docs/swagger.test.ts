@@ -10,10 +10,9 @@ jest.mock("../db/client", () => ({
 	},
 	piece: { findMany: jest.fn(), findUnique: jest.fn() },
 	creation: {
-		findFirst: jest.fn(),
 		create: jest.fn(),
 		findMany: jest.fn(),
-		delete: jest.fn(),
+		deleteMany: jest.fn(),
 	},
 }));
 
