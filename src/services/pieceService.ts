@@ -1,4 +1,5 @@
 import prisma from "../db/client";
+import { GLAZE_OPTIONS, PieceSchema } from "../schemas";
 import type { Piece } from "../types";
 
 interface FilterOptions {
@@ -19,11 +20,7 @@ type PrismaPiece = {
 };
 
 function toDomain(raw: PrismaPiece): Piece {
-	return {
-		...raw,
-		id: raw.id,
-		glaze: raw.glaze as Piece["glaze"],
-	};
+	return PieceSchema.parse(raw);
 }
 
 export async function getPieces(filters: FilterOptions): Promise<Piece[]> {
@@ -50,9 +47,5 @@ export async function getCollections(): Promise<string[]> {
 export async function getGlazes(): Promise<
 	Array<{ name: string; description: string }>
 > {
-	return [
-		{ name: "matte", description: "Non-shiny, velvety finish" },
-		{ name: "glossy", description: "Shiny, reflective surface" },
-		{ name: "textured", description: "Rough, tactile surface" },
-	];
+	return [...GLAZE_OPTIONS];
 }

@@ -13,8 +13,10 @@ jest.mock("../db/client", () => ({
 	},
 }));
 
+const PIECE_ID = "550e8400-e29b-41d4-a716-446655440000";
+
 const makePiece = (overrides: object = {}) => ({
-	id: "piece-uuid",
+	id: PIECE_ID,
 	name: "Test Bowl",
 	collection: "Spring",
 	glaze: "matte",
@@ -75,6 +77,14 @@ describe("getPieces", () => {
 			where: { collection: "Spring", glaze: "glossy", type: "vase" },
 		});
 	});
+
+	it("throws when a piece has an invalid glaze value", async () => {
+		jest
+			.mocked(prisma.piece.findMany)
+			.mockResolvedValue([makePiece({ glaze: "invalid" })] as never);
+
+		await expect(getPieces({})).rejects.toThrow();
+	});
 });
 
 describe("getPieceById", () => {
@@ -82,11 +92,11 @@ describe("getPieceById", () => {
 		const piece = makePiece();
 		jest.mocked(prisma.piece.findUnique).mockResolvedValue(piece as never);
 
-		const result = await getPieceById("piece-uuid");
+		const result = await getPieceById(PIECE_ID);
 
 		expect(result).toEqual(piece);
 		expect(prisma.piece.findUnique).toHaveBeenCalledWith({
-			where: { id: "piece-uuid" },
+			where: { id: PIECE_ID },
 		});
 	});
 
