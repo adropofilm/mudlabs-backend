@@ -61,17 +61,6 @@ export function generateAccessToken(userId: UUID): string {
 	return jwt.sign({ userId }, secret, { expiresIn: ACCESS_TOKEN_TTL_SECONDS });
 }
 
-// kept for backwards compat with existing tests
-export function generateToken(userId: UUID, email: string): string {
-	const secret = process.env.JWT_SECRET;
-	if (!secret) throw new Error("JWT_SECRET not configured");
-
-	return jwt.sign({ userId, email }, secret, {
-		expiresIn: (process.env.JWT_EXPIRES_IN ||
-			"7d") as jwt.SignOptions["expiresIn"],
-	});
-}
-
 async function buildAuthResponse(
 	userId: UUID,
 	user: UserPublic,

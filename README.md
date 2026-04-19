@@ -47,6 +47,7 @@ JWT_SECRET=your-secret-key-min-32-chars
 API_PORT=3000
 DATABASE_URL=postgresql://user@localhost:5432/mudlabs
 OPENAI_API_KEY=sk-your-key-here
+CLOUDINARY_URL=cloudinary://your-api-key:your-api-secret@your-cloud-name
 NODE_ENV=development
 ```
 
@@ -57,9 +58,10 @@ NODE_ENV=development
 - **Runtime** — Node.js with Express and TypeScript
 - **Database** — PostgreSQL via Prisma ORM
 - **Auth** — JWT access tokens (15 min) + refresh tokens (30 days) stored in the DB
-- **Validation** — express-openapi-validator reads the OpenAPI spec from JSDoc blocks above each route and rejects malformed requests before they hit the handler
+- **Validation** — OpenAPI spec enforced globally via express-openapi-validator (see [Validation](#validation))
 - **Rate limiting** — auth endpoints capped at 10 requests per 15 min, tour guide at 1 per 30 sec
-- **AI** — OpenAI GPT-4o mini powers the pottery tour guide
+- **AI** — OpenAI GPT-4o mini powers the pottery tour guide; DALL-E 3 generates custom piece images
+- **Image storage** — Cloudinary stores and serves all generated images
 
 ## Project Structure
 
@@ -97,11 +99,17 @@ The API is deployed on **Vercel**. The database runs on **Neon** (serverless Pos
 
 ---
 
+## Validation
+
+The OpenAPI spec is the single source of truth for request validation. Schemas defined in JSDoc above each route are enforced globally by **express-openapi-validator** before requests reach any handler — required fields, formats (`uuid`, `email`), and length constraints are all declared there.
+
+Route handlers don't duplicate this logic. If the validator passes a request through, the handler can trust the shape of the data.
+
+---
+
 ## Code Quality
 
 Linting and formatting use **Biome**. A pre-commit hook runs automatically on every commit — it auto-fixes formatting, then lints, then runs the full test suite. If any step fails the commit is blocked.
-
-Request validation is handled by **express-openapi-validator**, which reads the OpenAPI spec and rejects malformed requests before they reach route handlers.
 
 ---
 
@@ -120,11 +128,18 @@ GET    /pieces/:id
 GET    /pieces/meta/collections
 GET    /pieces/meta/glazes
 
-POST   /creations              (auth required)
-GET    /creations/users/:id    (auth required)
-DELETE /creations/:id          (auth required)
+POST   /creations                    (auth required)
+POST   /creations/generate-image     (auth required)
+GET    /creations/users/:id          (auth required)
+DELETE /creations/:id                (auth required)
 
 POST   /tour-guide/ask         (auth required)
 
 GET    /health
 ```
+
+---
+
+## Future Improvements
+
+- Automate TypeScript type generation from the OpenAPI spec using `openapi-typescript` instead of maintaining two sources of truth (`types.ts` and `swagger.ts`)

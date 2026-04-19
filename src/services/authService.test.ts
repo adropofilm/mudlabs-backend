@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../db/client";
 import type { UUID } from "../types";
 import {
-	generateToken,
+	generateAccessToken,
 	login,
 	logout,
 	refreshAccessToken,
@@ -185,23 +185,23 @@ describe("logout", () => {
 	});
 });
 
-describe("generateToken", () => {
+describe("generateAccessToken", () => {
 	beforeEach(() => {
 		process.env.JWT_SECRET = "test-secret-32-chars-minimum-len";
 	});
 
 	it("throws if JWT_SECRET is not configured", () => {
 		delete process.env.JWT_SECRET;
-		expect(() =>
-			generateToken("user-id" as unknown as UUID, "test@example.com"),
-		).toThrow("JWT_SECRET not configured");
+		expect(() => generateAccessToken("user-id" as unknown as UUID)).toThrow(
+			"JWT_SECRET not configured",
+		);
 	});
 
-	it("signs the token with userId and email in the payload", () => {
+	it("signs the token with userId in the payload", () => {
 		jest.mocked(jwt.sign).mockReturnValue("signed-token" as never);
-		generateToken("user-id" as unknown as UUID, "test@example.com");
+		generateAccessToken("user-id" as unknown as UUID);
 		expect(jwt.sign).toHaveBeenCalledWith(
-			{ userId: "user-id", email: "test@example.com" },
+			{ userId: "user-id" },
 			"test-secret-32-chars-minimum-len",
 			expect.any(Object),
 		);

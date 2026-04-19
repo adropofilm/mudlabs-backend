@@ -23,3 +23,15 @@ export const tourGuideLimiter = rateLimit({
 	standardHeaders: true,
 	legacyHeaders: false,
 });
+
+export const imageGenerationLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 1,
+	message: {
+		error: "Too many requests",
+		message: "Wait 60 seconds before generating another image",
+		statusCode: 429,
+	},
+	standardHeaders: true,
+	legacyHeaders: false,
+});

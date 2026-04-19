@@ -4,24 +4,91 @@ import {
 	type Response,
 	Router,
 } from "express";
-import { authMiddleware } from "../middleware/auth";
+import { authMiddleware, requireUserId } from "../middleware/auth";
 import { APIError } from "../middleware/errorHandler";
-import { validateUUID } from "../middleware/validate";
+import { imageGenerationLimiter } from "../middleware/rateLimit";
 import {
 	createCreation,
 	deleteCreation,
 	getUserCreations,
 } from "../services/creationService";
-import type { UUID } from "../types";
+import { generateCreationImage } from "../services/imageService";
+import { getPieceById } from "../services/pieceService";
+import type { CreationConfig, UUID } from "../types";
 
 const router = Router();
+
+/**
+ * @openapi
+ * /creations/generate-image:
+ *   post:
+ *     tags: [Creations]
+ *     summary: Generate an AI image from a pottery config
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [config]
+ *             properties:
+ *               config: { $ref: '#/components/schemas/CreationConfig' }
+ *     responses:
+ *       200:
+ *         description: Generated image URL and prompt used
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 imageUrl: { type: string }
+ *                 promptUsed: { type: string }
+ *       400:
+ *         description: Missing config
+ *       401:
+ *         description: Unauthorized
+ *       429:
+ *         description: Rate limit exceeded
+ */
+router.post(
+	"/generate-image",
+	authMiddleware,
+	imageGenerationLimiter,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { config }: { config: CreationConfig } = req.body;
+
+			if (!config) {
+				throw new APIError("Missing required field: config", 400);
+			}
+
+			const inspiredBy = config.inspiredByPieceId
+				? await getPieceById(config.inspiredByPieceId)
+				: undefined;
+
+			if (config.inspiredByPieceId && !inspiredBy) {
+				throw new APIError("Piece not found", 404);
+			}
+
+			const result = await generateCreationImage(
+				config,
+				inspiredBy ?? undefined,
+			);
+			res.json(result);
+		} catch (error) {
+			next(error);
+		}
+	},
+);
 
 /**
  * @openapi
  * /creations:
  *   post:
  *     tags: [Creations]
- *     summary: Create a custom piece
+ *     summary: Save a custom piece creation
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -34,10 +101,11 @@ const router = Router();
  *             properties:
  *               name: { type: string }
  *               intentDescription: { type: string }
- *               config: { type: object }
+ *               config: { $ref: '#/components/schemas/CreationConfig' }
+ *               imageUrl: { type: string }
  *     responses:
  *       201:
- *         description: Creation created
+ *         description: Creation saved
  *         content:
  *           application/json:
  *             schema:
@@ -52,17 +120,14 @@ router.post(
 	authMiddleware,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const { name, intentDescription, config } = req.body;
-			const userId = req.userId as UUID;
-
-			if (!name || !config) {
-				throw new APIError("Missing required fields", 400);
-			}
+			const { name, intentDescription, config, imageUrl } = req.body;
+			const userId = requireUserId(req);
 
 			const creation = await createCreation(userId, {
 				name,
 				intentDescription,
 				config,
+				imageUrl,
 			});
 
 			res.status(201).json(creation);
@@ -111,7 +176,7 @@ router.get(
 				throw new APIError("Forbidden", 403);
 			}
 
-			const creations = await getUserCreations(userId as UUID);
+			const creations = await getUserCreations(requireUserId(req));
 			res.json(creations);
 		} catch (error) {
 			next(error);
@@ -152,9 +217,8 @@ router.delete(
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
-			const userId = req.userId as UUID;
+			const userId = requireUserId(req);
 
-			validateUUID(id, "creation ID");
 			const success = await deleteCreation(id as UUID, userId);
 
 			if (!success) {

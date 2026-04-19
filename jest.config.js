@@ -12,4 +12,5 @@ module.exports = {
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   clearMocks: true,
   resetMocks: true,
+  setupFiles: ["./jest.setup.ts"],
 }

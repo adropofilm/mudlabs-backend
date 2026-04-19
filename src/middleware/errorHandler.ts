@@ -10,14 +10,20 @@ export class APIError extends Error {
 	}
 }
 
+function isHttpError(err: unknown): err is { status: number; message: string } {
+	return (
+		typeof err === "object" &&
+		err !== null &&
+		typeof (err as Record<string, unknown>).status === "number"
+	);
+}
+
 export const errorHandler = (
 	error: Error | APIError,
 	_req: Request,
 	res: Response,
 	_next: NextFunction,
 ) => {
-	console.error("Error:", error);
-
 	if (error instanceof APIError) {
 		const response: ErrorResponse = {
 			error: error.message,
@@ -28,17 +34,17 @@ export const errorHandler = (
 	}
 
 	// express-openapi-validator errors have a status property
-	const httpError = error as { status?: number; message: string };
-	if (httpError.status && httpError.status < 500) {
+	if (isHttpError(error) && error.status < 500) {
 		const response: ErrorResponse = {
 			error: "Validation Error",
-			message: httpError.message,
-			statusCode: httpError.status,
+			message: error.message,
+			statusCode: error.status,
 		};
-		return res.status(httpError.status).json(response);
+		return res.status(error.status).json(response);
 	}
 
-	// Generic error
+	// Generic error — log 5xx only
+	console.error("Internal error:", error);
 	const response: ErrorResponse = {
 		error: "Internal Server Error",
 		message:

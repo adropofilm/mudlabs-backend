@@ -10,10 +10,9 @@ jest.mock("../db/client", () => ({
 	},
 	piece: { findMany: jest.fn(), findUnique: jest.fn() },
 	creation: {
-		findFirst: jest.fn(),
 		create: jest.fn(),
 		findMany: jest.fn(),
-		delete: jest.fn(),
+		deleteMany: jest.fn(),
 	},
 }));
 
@@ -40,6 +39,13 @@ jest.mock("../services/tourGuideService", () => ({
 	askTourGuide: jest
 		.fn()
 		.mockResolvedValue({ response: "Hello!", timestamp: new Date() }),
+}));
+
+jest.mock("../services/imageService", () => ({
+	generateCreationImage: jest.fn().mockResolvedValue({
+		imageUrl: "https://res.cloudinary.com/test/image.png",
+		promptUsed: "A ceramic bowl",
+	}),
 }));
 
 jest.mock("../middleware/auth", () => ({

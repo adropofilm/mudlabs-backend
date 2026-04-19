@@ -4,13 +4,7 @@ import {
 	type Response,
 	Router,
 } from "express";
-import { APIError } from "../middleware/errorHandler";
 import { authLimiter } from "../middleware/rateLimit";
-import {
-	validateEmail,
-	validateName,
-	validatePassword,
-} from "../middleware/validate";
 import {
 	login,
 	logout,
@@ -58,13 +52,6 @@ router.post(
 		try {
 			const { email, password, name } = req.body;
 
-			if (!email || !password || !name) {
-				throw new APIError("Missing required fields", 400);
-			}
-			validateEmail(email);
-			validatePassword(password);
-			validateName(name);
-
 			const result = await register(email, password, name);
 			res.status(201).json(result);
 		} catch (error) {
@@ -108,11 +95,6 @@ router.post(
 		try {
 			const { email, password } = req.body;
 
-			if (!email || !password) {
-				throw new APIError("Missing email or password", 400);
-			}
-			validateEmail(email);
-
 			const result = await login(email, password);
 			res.json(result);
 		} catch (error) {
@@ -151,10 +133,10 @@ router.post(
  */
 router.post(
 	"/refresh",
+	authLimiter,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { refreshToken } = req.body;
-			if (!refreshToken) throw new APIError("Missing refresh token", 400);
 
 			const result = await refreshAccessToken(refreshToken);
 			res.json(result);
@@ -194,7 +176,6 @@ router.post(
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { refreshToken } = req.body;
-			if (!refreshToken) throw new APIError("Missing refresh token", 400);
 
 			await logout(refreshToken);
 			res.json({ success: true });
