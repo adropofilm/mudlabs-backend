@@ -102,7 +102,7 @@ Each type is defined once and flows to both the backend and frontend automatical
 | What | Where |
 |------|-------|
 | API shapes — anything a route sends or receives | `src/schemas/index.ts` |
-| Internal shared types — never sent to a client (e.g. `JWTPayload`, `UUID`) | `src/types.ts` |
+| Internal shared types — never sent to a client (e.g. `JWTPayload`) | `src/types.ts` |
 | Types only used in one file | Define them locally in that file |
 
 ### Making a type change
@@ -189,5 +189,4 @@ GET    /health
 ---
 
 ## Limitations
-- Cloudinary cleanup on deletion — we've got a data leak cause orphaned assets are being created right now every time a creation is deleted.
 - Logout doesn't fully log you out. The access token stays valid up to 15 min.
