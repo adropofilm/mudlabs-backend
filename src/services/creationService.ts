@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { v2 as cloudinary } from "cloudinary";
 import prisma from "../db/client";
 import type { Creation, CreationConfig, UUID } from "../types";
 
@@ -52,12 +53,34 @@ export async function getUserCreations(userId: UUID): Promise<Creation[]> {
 	return creations.map(toDomain);
 }
 
+function extractCloudinaryPublicId(url: string): string | null {
+	const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/);
+	return match ? match[1] : null;
+}
+
 export async function deleteCreation(
 	creationId: UUID,
 	userId: UUID,
 ): Promise<boolean> {
+	const creation = await prisma.creation.findUnique({
+		where: { id: creationId },
+		select: { imageUrl: true },
+	});
+
 	const { count } = await prisma.creation.deleteMany({
 		where: { id: creationId, userId },
 	});
+
+	if (count > 0 && creation?.imageUrl) {
+		const publicId = extractCloudinaryPublicId(creation.imageUrl);
+		if (publicId) {
+			try {
+				await cloudinary.uploader.destroy(publicId);
+			} catch (err) {
+				console.error(`Failed to delete Cloudinary asset ${publicId}:`, err);
+			}
+		}
+	}
+
 	return count > 0;
 }
