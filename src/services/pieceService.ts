@@ -19,7 +19,11 @@ type PrismaPiece = {
 };
 
 function toDomain(raw: PrismaPiece): Piece {
-	return { ...raw, id: raw.id as UUID };
+	return {
+		...raw,
+		id: raw.id as UUID,
+		glaze: raw.glaze as Piece["glaze"],
+	};
 }
 
 export async function getPieces(filters: FilterOptions): Promise<Piece[]> {

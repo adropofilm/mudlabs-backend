@@ -69,9 +69,11 @@ NODE_ENV=development
 src/
 ├── app.ts                   # Express app setup
 ├── main.ts                  # Server entry point
-├── types.ts                 # Shared TypeScript interfaces
+├── types.ts                 # Re-exports API types from schemas; internal-only types live here
+├── schemas/
+│   └── index.ts             # Zod schemas — single source of truth for all API types
 ├── docs/
-│   └── swagger.ts           # OpenAPI spec (served at /api-docs)
+│   └── swagger.ts           # OpenAPI spec built from schemas (served at /api-docs)
 ├── middleware/
 │   ├── auth.ts              # JWT verification
 │   ├── errorHandler.ts      # Global error handler
@@ -93,6 +95,52 @@ src/
 
 ---
 
+## Types
+
+Each type is defined once and flows to both the backend and frontend automatically. There is one place per concern:
+
+| What | Where |
+|------|-------|
+| API shapes — anything a route sends or receives | `src/schemas/index.ts` |
+| Internal shared types — never sent to a client (e.g. `JWTPayload`, `UUID`) | `src/types.ts` |
+| Types only used in one file | Define them locally in that file |
+
+### Making a type change
+
+**1. Edit `src/schemas/index.ts`**
+Add or update the shape and its constraints here (e.g. `z.string().email()`, `z.string().min(8)`). The TypeScript type is immediately importable anywhere in the backend — no separate interface needed.
+
+**2. Update `src/docs/swagger.ts` if the type is part of a route**
+This file is not auto-generated — edit it by hand. Find the relevant `registry.registerPath()` call and point it at your updated schema. You are not redefining the shape here, just telling the route to use it. Skip this step if the type isn't part of a request or response.
+
+**3. Restart the server**
+`/api-docs.json` is generated at runtime from `swagger.ts`. No build step — just restart and the spec reflects your changes.
+
+**4. Tell frontends to re-run codegen**
+```bash
+# run this in the frontend project
+npx openapi-typescript http://localhost:3000/api-docs.json -o src/api/types.ts
+```
+Frontends can add this as a script in their `package.json` so it's easy to re-run:
+```json
+"gen:types": "openapi-typescript http://localhost:3000/api-docs.json -o src/api/types.ts"
+```
+
+---
+
+## Changing the Database Schema
+
+Any time you modify `prisma/schema.prisma`, run this before starting the app or tests:
+
+```bash
+# Create and apply a new migration
+npx prisma migrate dev --name describe-your-change
+```
+
+`prisma generate` runs automatically via the `postinstall` script after every `npm install`, so the TypeScript types stay in sync. If you ever see an error like `Module '@prisma/client' has no exported member 'Prisma'`, run `npx prisma generate` manually to fix it.
+
+---
+
 ## Hosting
 
 The API is deployed on **Vercel**. The database runs on **Neon** (serverless Postgres). Piece images are stored and served via **Cloudinary**.
@@ -101,9 +149,9 @@ The API is deployed on **Vercel**. The database runs on **Neon** (serverless Pos
 
 ## Validation
 
-The OpenAPI spec is the single source of truth for request validation. Schemas defined in JSDoc above each route are enforced globally by **express-openapi-validator** before requests reach any handler — required fields, formats (`uuid`, `email`), and length constraints are all declared there.
+All request shapes are defined as Zod schemas in `src/schemas/index.ts`. These schemas drive both the OpenAPI spec and TypeScript types — there is one place to define a field, its format, and its constraints.
 
-Route handlers don't duplicate this logic. If the validator passes a request through, the handler can trust the shape of the data.
+The OpenAPI spec generated from those schemas is enforced globally by **express-openapi-validator** before requests reach any handler. Route handlers don't duplicate validation logic — if the validator passes a request through, the handler can trust the shape of the data.
 
 ---
 
@@ -142,5 +190,4 @@ GET    /health
 
 ## Limitations
 - Cloudinary cleanup on deletion — we've got a data leak cause orphaned assets are being created right now every time a creation is deleted.
-- Every schema change risks types.ts and swagger.ts drifting. It's an ongoing maintenance burden cause we have 2 sources of truth.
 - Logout doesn't fully log you out. The access token stays valid up to 15 min.
