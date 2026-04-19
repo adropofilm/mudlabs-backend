@@ -1,11 +1,6 @@
 // UUID type
 export type UUID = string & { readonly brand: "UUID" };
 
-export const createUUID = (): UUID => {
-	const { v4 } = require("uuid");
-	return v4() as UUID;
-};
-
 // ============ USER ============
 export interface User {
 	id: UUID;
@@ -68,7 +63,6 @@ export interface AuthResponse {
 
 export interface JWTPayload {
 	userId: UUID;
-	email: string;
 	iat: number; // issued at
 	exp: number; // expires at
 }

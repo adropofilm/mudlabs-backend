@@ -2,9 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import OpenAI from "openai";
 import type { CreationConfig, GenerateImageResponse, Piece } from "../types";
 
-const openai = new OpenAI({
-	apiKey: process.env.OPENAI_API_KEY ?? "not-configured",
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export function buildImagePrompt(
 	config: CreationConfig,

@@ -12,9 +12,13 @@ export async function askTourGuide(
 		content: buildSystemPrompt(),
 	};
 
+	// Cap history to avoid unbounded token usage on each request
+	const MAX_HISTORY_TURNS = 10;
 	const historyMessages: OpenAI.Chat.ChatCompletionMessageParam[] = (
 		conversationHistory ?? []
-	).map(({ role, content }) => ({ role, content }));
+	)
+		.slice(-MAX_HISTORY_TURNS)
+		.map(({ role, content }) => ({ role, content }));
 
 	const userMessage: OpenAI.Chat.ChatCompletionMessageParam = {
 		role: "user",

@@ -24,8 +24,6 @@ export const errorHandler = (
 	res: Response,
 	_next: NextFunction,
 ) => {
-	console.error("Error:", error);
-
 	if (error instanceof APIError) {
 		const response: ErrorResponse = {
 			error: error.message,
@@ -45,7 +43,8 @@ export const errorHandler = (
 		return res.status(error.status).json(response);
 	}
 
-	// Generic error
+	// Generic error — log 5xx only
+	console.error("Internal error:", error);
 	const response: ErrorResponse = {
 		error: "Internal Server Error",
 		message:
