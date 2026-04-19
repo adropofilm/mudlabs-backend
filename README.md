@@ -55,7 +55,8 @@ NODE_ENV=development
 
 ## Architecture
 
-- **Runtime** — Node.js with Express and TypeScript
+- **Build** — TypeScript compiler (`tsc`) compiles `src/` → `dist/` before deployment
+- **Runtime** — Node.js with Express
 - **Database** — PostgreSQL via Prisma ORM
 - **Auth** — JWT access tokens (15 min) + refresh tokens (30 days) stored in the DB
 - **Validation** — OpenAPI spec enforced globally via express-openapi-validator (see [Validation](#validation))
