@@ -189,4 +189,10 @@ GET    /health
 ---
 
 ## Limitations
-- Logout doesn't fully log you out. The access token stays valid up to 15 min.
+- Logout doesn't fully log you out. The access token stays valid up to 15 min. 
+- If DB save fails after Cloudinary upload, or vice versa, images are permanently orphaned with no recovery path.
+- Expired refresh tokens never cleaned up
+- Max 10 conversation turns hardcoded (MAX_HISTORY_TURNS = 10 in tourGuideService.ts).
+- No user profile management has no view/edit profile, no password reset, no email verification.
+- Only exact-match filtering on pieces; no full-text search.
+- Creations are entirely private, no public gallery.
