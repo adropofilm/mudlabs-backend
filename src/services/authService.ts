@@ -3,7 +3,7 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../db/client";
 import { APIError } from "../middleware/errorHandler";
-import type { AuthResponse, UserPublic, UUID } from "../types";
+import type { AuthResponse, UserPublic } from "../types";
 
 const REFRESH_TOKEN_TTL_DAYS = 30;
 const ACCESS_TOKEN_TTL_SECONDS = 900; // 15 min
@@ -21,7 +21,7 @@ export async function register(
 		data: { email, name, passwordHash },
 	});
 
-	return buildAuthResponse(user.id as UUID, userToPublic(user));
+	return buildAuthResponse(user.id, userToPublic(user));
 }
 
 export async function login(
@@ -34,7 +34,7 @@ export async function login(
 	const isPasswordValid = await bcryptjs.compare(password, user.passwordHash);
 	if (!isPasswordValid) throw new APIError("Invalid email or password", 401);
 
-	return buildAuthResponse(user.id as UUID, userToPublic(user));
+	return buildAuthResponse(user.id, userToPublic(user));
 }
 
 export async function refreshAccessToken(
@@ -46,7 +46,7 @@ export async function refreshAccessToken(
 		throw new APIError("Invalid or expired refresh token", 401);
 	}
 
-	const accessToken = generateAccessToken(stored.userId as UUID);
+	const accessToken = generateAccessToken(stored.userId);
 	return { accessToken, expiresIn: ACCESS_TOKEN_TTL_SECONDS };
 }
 
@@ -54,7 +54,7 @@ export async function logout(token: string): Promise<void> {
 	await prisma.refreshToken.deleteMany({ where: { token } });
 }
 
-export function generateAccessToken(userId: UUID): string {
+export function generateAccessToken(userId: string): string {
 	const secret = process.env.JWT_SECRET;
 	if (!secret) throw new Error("JWT_SECRET not configured");
 
@@ -62,7 +62,7 @@ export function generateAccessToken(userId: UUID): string {
 }
 
 async function buildAuthResponse(
-	userId: UUID,
+	userId: string,
 	user: UserPublic,
 ): Promise<AuthResponse> {
 	const accessToken = generateAccessToken(userId);
@@ -90,7 +90,7 @@ function userToPublic(user: {
 	createdAt: Date;
 }): UserPublic {
 	return {
-		id: user.id as UUID,
+		id: user.id,
 		email: user.email,
 		name: user.name,
 		createdAt: user.createdAt,

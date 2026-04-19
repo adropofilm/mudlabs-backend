@@ -21,7 +21,7 @@ app.use(
 	OpenApiValidator.middleware({
 		apiSpec: swaggerSpec as never,
 		validateRequests: true,
-		validateResponses: false,
+		validateResponses: false, // enabling this adds latency and would expose internal schema details in error messages
 		// Auth is handled by authMiddleware which verifies the JWT. The validator
 		// only checks header presence, which is redundant and weaker
 		validateSecurity: false,

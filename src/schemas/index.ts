@@ -49,12 +49,22 @@ export const AuthResponseSchema = z
 	.openapi("AuthResponse");
 
 // ---- Pieces ----
+export const GLAZE_OPTIONS = [
+	{ name: "matte", description: "Non-shiny, velvety finish" },
+	{ name: "glossy", description: "Shiny, reflective surface" },
+	{ name: "textured", description: "Rough, tactile surface" },
+] as const;
+
+export const GlazeEnum = z.enum(
+	GLAZE_OPTIONS.map((g) => g.name) as [string, ...string[]],
+);
+
 export const PieceSchema = z
 	.object({
 		id: UUIDSchema,
 		name: z.string(),
 		collection: z.string(),
-		glaze: z.enum(["matte", "glossy", "textured"]),
+		glaze: GlazeEnum,
 		color: z.string(),
 		type: z.string(),
 		description: z.string(),

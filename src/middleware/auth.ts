@@ -1,16 +1,16 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import type { JWTPayload, UUID } from "../types";
+import type { JWTPayload } from "../types";
 
 declare global {
 	namespace Express {
 		interface Request {
-			userId?: UUID;
+			userId?: string;
 		}
 	}
 }
 
-export function requireUserId(req: Request): UUID {
+export function requireUserId(req: Request): string {
 	if (!req.userId) throw new Error("userId missing after authMiddleware");
 	return req.userId;
 }

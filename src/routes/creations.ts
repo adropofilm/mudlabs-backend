@@ -14,7 +14,7 @@ import {
 } from "../services/creationService";
 import { generateCreationImage } from "../services/imageService";
 import { getPieceById } from "../services/pieceService";
-import type { CreationConfig, UUID } from "../types";
+import type { CreationConfig } from "../types";
 
 const router = Router();
 
@@ -99,7 +99,7 @@ router.delete(
 			const { id } = req.params;
 			const userId = requireUserId(req);
 
-			const success = await deleteCreation(id as UUID, userId);
+			const success = await deleteCreation(id, userId);
 
 			if (!success) {
 				throw new APIError("Creation not found or unauthorized", 404);

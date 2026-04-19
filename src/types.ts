@@ -12,12 +12,9 @@ export type {
 	UserPublic,
 } from "./schemas";
 
-// Branded UUID — used internally for type-safe ID handling
-export type UUID = string & { readonly brand: "UUID" };
-
 // Internal user shape (includes passwordHash, never sent to clients)
 export interface User {
-	id: UUID;
+	id: string;
 	email: string;
 	name: string;
 	passwordHash: string;
@@ -26,7 +23,7 @@ export interface User {
 
 // JWT payload shape
 export interface JWTPayload {
-	userId: UUID;
+	userId: string;
 	iat: number;
 	exp: number;
 }

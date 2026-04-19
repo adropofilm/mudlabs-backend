@@ -1,7 +1,6 @@
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../db/client";
-import type { UUID } from "../types";
 import {
 	generateAccessToken,
 	login,
@@ -192,14 +191,14 @@ describe("generateAccessToken", () => {
 
 	it("throws if JWT_SECRET is not configured", () => {
 		delete process.env.JWT_SECRET;
-		expect(() => generateAccessToken("user-id" as unknown as UUID)).toThrow(
+		expect(() => generateAccessToken("user-id")).toThrow(
 			"JWT_SECRET not configured",
 		);
 	});
 
 	it("signs the token with userId in the payload", () => {
 		jest.mocked(jwt.sign).mockReturnValue("signed-token" as never);
-		generateAccessToken("user-id" as unknown as UUID);
+		generateAccessToken("user-id");
 		expect(jwt.sign).toHaveBeenCalledWith(
 			{ userId: "user-id" },
 			"test-secret-32-chars-minimum-len",
