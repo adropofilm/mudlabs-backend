@@ -14,7 +14,6 @@
     "lint:fix": "biome check --write src/",
     "format": "biome format --write src/",
     "db:seed": "ts-node prisma/seed.ts",
-    "postinstall": "prisma generate",
     "prepare": "husky"
   },
   "dependencies": {
@@ -32,7 +31,7 @@
     "jsonwebtoken": "^9.0.2",
     "openai": "^6.34.0",
     "pg": "^8.20.0",
-    "prisma": "^6.19.3",
+    "prisma": "^7.7.0",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^9.0.1",
     "zod": "^4.3.6"
