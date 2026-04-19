@@ -140,6 +140,7 @@ GET    /health
 
 ---
 
-## Future Improvements
-
-- Automate TypeScript type generation from the OpenAPI spec using `openapi-typescript` instead of maintaining two sources of truth (`types.ts` and `swagger.ts`)
+## Limitations
+- Cloudinary cleanup on deletion — we've got a data leak cause orphaned assets are being created right now every time a creation is deleted.
+- Every schema change risks types.ts and swagger.ts drifting. It's an ongoing maintenance burden cause we have 2 sources of truth.
+- Logout doesn't fully log you out. The access token stays valid up to 15 min.
