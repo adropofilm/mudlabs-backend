@@ -25,6 +25,7 @@ app.use(
 		// Auth is handled by authMiddleware which verifies the JWT. The validator
 		// only checks header presence, which is redundant and weaker
 		validateSecurity: false,
+		ignorePaths: /^\/api-docs/,
 	}),
 );
 
