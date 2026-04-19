@@ -2,7 +2,6 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import type { JWTPayload, UUID } from "../types";
 
-// Extend Express Request to include userId
 declare global {
 	namespace Express {
 		interface Request {
@@ -11,13 +10,17 @@ declare global {
 	}
 }
 
+export function requireUserId(req: Request): UUID {
+	if (!req.userId) throw new Error("userId missing after authMiddleware");
+	return req.userId;
+}
+
 export const authMiddleware = (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ) => {
 	try {
-		// Extract token from Authorization header
 		const authHeader = req.headers.authorization;
 		if (!authHeader?.startsWith("Bearer ")) {
 			return res.status(401).json({
@@ -27,17 +30,23 @@ export const authMiddleware = (
 			});
 		}
 
-		const token = authHeader.slice(7); // Remove 'Bearer ' prefix
+		const token = authHeader.slice(7);
 
-		// Verify JWT signature
 		const secret = process.env.JWT_SECRET;
 		if (!secret) {
 			throw new Error("JWT_SECRET not configured");
 		}
 
-		const payload = jwt.verify(token, secret) as JWTPayload;
+		const decoded = jwt.verify(token, secret);
+		if (typeof decoded === "string") {
+			return res.status(401).json({
+				error: "Unauthorized",
+				message: "Invalid token",
+				statusCode: 401,
+			});
+		}
 
-		// Attach userId to request
+		const payload = decoded as JWTPayload;
 		req.userId = payload.userId;
 
 		next();
@@ -58,10 +67,6 @@ export const authMiddleware = (
 			});
 		}
 
-		return res.status(401).json({
-			error: "Unauthorized",
-			message: "Authentication failed",
-			statusCode: 401,
-		});
+		next(error);
 	}
 };

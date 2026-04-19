@@ -46,9 +46,9 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 		const { collection, glaze, type } = req.query;
 
 		const pieces = await getPieces({
-			collection: collection as string,
-			glaze: glaze as string,
-			type: type as string,
+			collection: typeof collection === "string" ? collection : undefined,
+			glaze: typeof glaze === "string" ? glaze : undefined,
+			type: typeof type === "string" ? type : undefined,
 		});
 
 		res.json(pieces);

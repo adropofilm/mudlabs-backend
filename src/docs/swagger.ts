@@ -39,6 +39,25 @@ const options: swaggerJsdoc.Options = {
 						photoUrl: { type: "string", format: "uri" },
 					},
 				},
+				CreationConfig: {
+					type: "object",
+					required: ["shape", "glaze", "color", "size", "details"],
+					properties: {
+						shape: { type: "string" },
+						glaze: { type: "string" },
+						color: { type: "string" },
+						size: {
+							type: "object",
+							required: ["height", "width"],
+							properties: {
+								height: { type: "number" },
+								width: { type: "number" },
+							},
+						},
+						details: { type: "array", items: { type: "string" } },
+						inspiredByPieceId: { type: "string", format: "uuid" },
+					},
+				},
 				Creation: {
 					type: "object",
 					properties: {
@@ -46,7 +65,8 @@ const options: swaggerJsdoc.Options = {
 						userId: { type: "string", format: "uuid" },
 						name: { type: "string" },
 						intentDescription: { type: "string" },
-						config: { type: "object" },
+						config: { $ref: "#/components/schemas/CreationConfig" },
+						imageUrl: { type: "string", format: "uri" },
 						createdAt: { type: "string", format: "date-time" },
 					},
 				},

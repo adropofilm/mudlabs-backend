@@ -151,6 +151,7 @@ router.post(
  */
 router.post(
 	"/refresh",
+	authLimiter,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { refreshToken } = req.body;

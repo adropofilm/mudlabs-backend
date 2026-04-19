@@ -28,8 +28,13 @@ export async function askTourGuide(
 		messages,
 	});
 
+	const content = completion.choices[0]?.message?.content;
+	if (!content) {
+		throw new Error("No response returned from OpenAI");
+	}
+
 	return {
-		response: completion.choices[0].message.content ?? "",
+		response: content,
 		timestamp: new Date(),
 	};
 }

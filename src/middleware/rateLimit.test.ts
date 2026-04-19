@@ -42,6 +42,13 @@ jest.mock("../services/tourGuideService", () => ({
 		.mockResolvedValue({ response: "Hello!", timestamp: new Date() }),
 }));
 
+jest.mock("../services/imageService", () => ({
+	generateCreationImage: jest.fn().mockResolvedValue({
+		imageUrl: "https://res.cloudinary.com/test/image.png",
+		promptUsed: "A ceramic bowl",
+	}),
+}));
+
 jest.mock("../middleware/auth", () => ({
 	authMiddleware: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));

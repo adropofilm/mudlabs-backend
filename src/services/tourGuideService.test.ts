@@ -87,11 +87,11 @@ describe("askTourGuide", () => {
 		expect(messages).toHaveLength(2); // system + user
 	});
 
-	it("falls back to empty string if OpenAI returns null content", async () => {
+	it("throws if OpenAI returns null content", async () => {
 		mockCreate.mockResolvedValue(makeCompletion(null));
 
-		const result = await askTourGuide("anything");
-
-		expect(result.response).toBe("");
+		await expect(askTourGuide("anything")).rejects.toThrow(
+			"No response returned from OpenAI",
+		);
 	});
 });
