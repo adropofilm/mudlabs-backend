@@ -18,40 +18,6 @@ import type { CreationConfig, UUID } from "../types";
 
 const router = Router();
 
-/**
- * @openapi
- * /creations/generate-image:
- *   post:
- *     tags: [Creations]
- *     summary: Generate an AI image from a pottery config
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [config]
- *             properties:
- *               config: { $ref: '#/components/schemas/CreationConfig' }
- *     responses:
- *       200:
- *         description: Generated image URL and prompt used
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 imageUrl: { type: string }
- *                 promptUsed: { type: string }
- *       400:
- *         description: Missing config
- *       401:
- *         description: Unauthorized
- *       429:
- *         description: Rate limit exceeded
- */
 router.post(
 	"/generate-image",
 	authMiddleware,
@@ -83,38 +49,6 @@ router.post(
 	},
 );
 
-/**
- * @openapi
- * /creations:
- *   post:
- *     tags: [Creations]
- *     summary: Save a custom piece creation
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [name, config]
- *             properties:
- *               name: { type: string }
- *               intentDescription: { type: string }
- *               config: { $ref: '#/components/schemas/CreationConfig' }
- *               imageUrl: { type: string }
- *     responses:
- *       201:
- *         description: Creation saved
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Creation'
- *       400:
- *         description: Missing required fields
- *       401:
- *         description: Unauthorized
- */
 router.post(
 	"/",
 	authMiddleware,
@@ -137,33 +71,6 @@ router.post(
 	},
 );
 
-/**
- * @openapi
- * /creations/users/{userId}:
- *   get:
- *     tags: [Creations]
- *     summary: Get all creations for a user
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema: { type: string, format: uuid }
- *     responses:
- *       200:
- *         description: List of creations
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Creation'
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
- */
 router.get(
 	"/users/:userId",
 	authMiddleware,
@@ -184,33 +91,6 @@ router.get(
 	},
 );
 
-/**
- * @openapi
- * /creations/{id}:
- *   delete:
- *     tags: [Creations]
- *     summary: Delete a creation
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string, format: uuid }
- *     responses:
- *       200:
- *         description: Deleted
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success: { type: boolean }
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Creation not found or unauthorized
- */
 router.delete(
 	"/:id",
 	authMiddleware,

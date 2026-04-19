@@ -1,7 +1,21 @@
-// UUID type
+// Re-export API types — source of truth is src/schemas/index.ts
+export type {
+	AuthResponse,
+	Creation,
+	CreationConfig,
+	ErrorResponse,
+	GenerateImageResponse,
+	Piece,
+	TourGuideMessage,
+	TourGuideRequest,
+	TourGuideResponse,
+	UserPublic,
+} from "./schemas";
+
+// Branded UUID — used internally for type-safe ID handling
 export type UUID = string & { readonly brand: "UUID" };
 
-// ============ USER ============
+// Internal user shape (includes passwordHash, never sent to clients)
 export interface User {
 	id: UUID;
 	email: string;
@@ -10,83 +24,9 @@ export interface User {
 	createdAt: Date;
 }
 
-// Return user to frontend (never include passwordHash)
-export type UserPublic = Omit<User, "passwordHash">;
-
-// ============ GALLERY PIECES ============
-export interface Piece {
-	id: UUID;
-	name: string;
-	collection: string;
-	glaze: string;
-	color: string;
-	type: string;
-	description: string;
-	photoUrl: string;
-}
-
-// ============ USER CREATIONS ============
-export interface CreationConfig {
-	shape: string;
-	glaze: string;
-	color: string;
-	size: {
-		height: number;
-		width: number;
-	};
-	details: string[];
-	inspiredByPieceId?: UUID;
-}
-
-export interface Creation {
-	id: UUID;
-	userId: UUID;
-	name: string;
-	createdAt: Date;
-	intentDescription?: string;
-	config: CreationConfig;
-	imageUrl?: string;
-}
-
-export interface GenerateImageResponse {
-	imageUrl: string;
-	promptUsed: string;
-}
-
-// ============ AUTH ============
-export interface AuthResponse {
-	accessToken: string;
-	refreshToken: string;
-	user: UserPublic;
-	expiresIn: number; // seconds (900 = 15 min)
-}
-
+// JWT payload shape
 export interface JWTPayload {
 	userId: UUID;
-	iat: number; // issued at
-	exp: number; // expires at
-}
-
-// ============ API ERRORS ============
-export interface ErrorResponse {
-	error: string;
-	message: string;
-	statusCode: number;
-}
-
-// ============ TOUR GUIDE ============
-export interface TourGuideMessage {
-	role: "user" | "assistant";
-	content: string;
-	timestamp: Date;
-}
-
-export interface TourGuideRequest {
-	message: string;
-	conversationHistory?: TourGuideMessage[];
-}
-
-export interface TourGuideResponse {
-	response: string;
-	timestamp: Date;
+	iat: number;
+	exp: number;
 }
