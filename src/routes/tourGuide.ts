@@ -5,7 +5,6 @@ import {
 	Router,
 } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { APIError } from "../middleware/errorHandler";
 import { tourGuideLimiter } from "../middleware/rateLimit";
 import { askTourGuide } from "../services/tourGuideService";
 import type { TourGuideRequest } from "../types";
@@ -28,7 +27,7 @@ const router = Router();
  *             type: object
  *             required: [message]
  *             properties:
- *               message: { type: string }
+ *               message: { type: string, minLength: 1 }
  *               conversationHistory:
  *                 type: array
  *                 items:
@@ -61,10 +60,6 @@ router.post(
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { message, conversationHistory } = req.body as TourGuideRequest;
-
-			if (!message || message.trim().length === 0) {
-				throw new APIError("Message cannot be empty", 400);
-			}
 
 			const response = await askTourGuide(message, conversationHistory);
 			res.json(response);
