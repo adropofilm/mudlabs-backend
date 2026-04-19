@@ -3,17 +3,31 @@ import type { TourGuideMessage, TourGuideResponse } from "../types";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const MAX_HISTORY_TURNS = 10;
+const SYSTEM_PROMPT = `You are a friendly pottery expert tour guide for the MudLab gallery.
+Your role is to help visitors understand pottery, glazes, techniques, and our collection.
+Always explain pottery terms in concise beginner-friendly language.
+Never use jargon without explaining it.
+Be encouraging and help people learn about ceramic art.
+
+Gallery Information:
+- We create handmade pottery pieces
+- We have several glaze options: matte, glossy, textured
+- Users can browse our collection or create custom pieces
+- A piece includes: shape, glaze, color, size, and optional details
+
+Be helpful, knowledgeable, and warm in your responses.`;
+
 export async function askTourGuide(
 	message: string,
 	conversationHistory?: TourGuideMessage[],
 ): Promise<TourGuideResponse> {
 	const systemMessage: OpenAI.Chat.ChatCompletionMessageParam = {
 		role: "system",
-		content: buildSystemPrompt(),
+		content: SYSTEM_PROMPT,
 	};
 
 	// Cap history to avoid unbounded token usage on each request
-	const MAX_HISTORY_TURNS = 10;
 	const historyMessages: OpenAI.Chat.ChatCompletionMessageParam[] = (
 		conversationHistory ?? []
 	)
@@ -41,20 +55,4 @@ export async function askTourGuide(
 		response: content,
 		timestamp: new Date(),
 	};
-}
-
-function buildSystemPrompt(): string {
-	return `You are a friendly pottery expert tour guide for the MudLab gallery.
-Your role is to help visitors understand pottery, glazes, techniques, and our collection.
-Always explain pottery terms in concise beginner-friendly language.
-Never use jargon without explaining it.
-Be encouraging and help people learn about ceramic art.
-
-Gallery Information:
-- We create handmade pottery pieces
-- We have several glaze options: matte, glossy, textured
-- Users can browse our collection or create custom pieces
-- A piece includes: shape, glaze, color, size, and optional details
-
-Be helpful, knowledgeable, and warm in your responses.`;
 }
