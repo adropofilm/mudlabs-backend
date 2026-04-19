@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { v2 as cloudinary } from "cloudinary";
 import prisma from "../db/client";
+import { CreationConfigSchema } from "../schemas";
 import type { Creation, CreationConfig } from "../types";
 
 interface CreateCreationInput {
@@ -26,7 +27,7 @@ function toDomain(raw: PrismaCreation): Creation {
 		userId: raw.userId,
 		name: raw.name,
 		intentDescription: raw.intentDescription ?? undefined,
-		config: raw.config as unknown as CreationConfig,
+		config: CreationConfigSchema.parse(raw.config),
 		imageUrl: raw.imageUrl ?? undefined,
 		createdAt: raw.createdAt,
 	};
