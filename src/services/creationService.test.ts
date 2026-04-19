@@ -1,5 +1,4 @@
 import prisma from "../db/client";
-import type { UUID } from "../types";
 import { deleteCreation } from "./creationService";
 
 jest.mock("../db/client", () => ({
@@ -15,8 +14,8 @@ jest.mock("cloudinary", () => ({
 
 import { v2 as cloudinary } from "cloudinary";
 
-const creationId = "creation-uuid" as unknown as UUID;
-const ownerId = "owner-uuid" as unknown as UUID;
+const creationId = "creation-uuid";
+const ownerId = "owner-uuid";
 const imageUrl =
 	"https://res.cloudinary.com/demo/image/upload/v1/mudlab/creations/abc123.png";
 
@@ -75,7 +74,7 @@ describe("deleteCreation", () => {
 			.mockResolvedValue({ imageUrl } as never);
 		jest.mocked(prisma.creation.deleteMany).mockResolvedValue({ count: 0 });
 
-		const result = await deleteCreation(creationId, userId as unknown as UUID);
+		const result = await deleteCreation(creationId, userId);
 
 		expect(result).toBe(false);
 		expect(cloudinary.uploader.destroy).not.toHaveBeenCalled();

@@ -1,5 +1,4 @@
 import prisma from "../db/client";
-import type { UUID } from "../types";
 import {
 	getCollections,
 	getGlazes,
@@ -15,7 +14,7 @@ jest.mock("../db/client", () => ({
 }));
 
 const makePiece = (overrides: object = {}) => ({
-	id: "piece-uuid" as UUID,
+	id: "piece-uuid",
 	name: "Test Bowl",
 	collection: "Spring",
 	glaze: "matte",
@@ -83,7 +82,7 @@ describe("getPieceById", () => {
 		const piece = makePiece();
 		jest.mocked(prisma.piece.findUnique).mockResolvedValue(piece as never);
 
-		const result = await getPieceById("piece-uuid" as UUID);
+		const result = await getPieceById("piece-uuid");
 
 		expect(result).toEqual(piece);
 		expect(prisma.piece.findUnique).toHaveBeenCalledWith({
@@ -94,7 +93,7 @@ describe("getPieceById", () => {
 	it("returns null when piece does not exist", async () => {
 		jest.mocked(prisma.piece.findUnique).mockResolvedValue(null);
 
-		const result = await getPieceById("missing-uuid" as UUID);
+		const result = await getPieceById("missing-uuid");
 
 		expect(result).toBeNull();
 	});

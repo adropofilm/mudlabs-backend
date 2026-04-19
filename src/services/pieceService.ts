@@ -1,5 +1,5 @@
 import prisma from "../db/client";
-import type { Piece, UUID } from "../types";
+import type { Piece } from "../types";
 
 interface FilterOptions {
 	collection?: string;
@@ -21,7 +21,7 @@ type PrismaPiece = {
 function toDomain(raw: PrismaPiece): Piece {
 	return {
 		...raw,
-		id: raw.id as UUID,
+		id: raw.id,
 		glaze: raw.glaze as Piece["glaze"],
 	};
 }
