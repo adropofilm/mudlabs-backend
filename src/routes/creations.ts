@@ -7,7 +7,6 @@ import {
 import { authMiddleware, requireUserId } from "../middleware/auth";
 import { APIError } from "../middleware/errorHandler";
 import { imageGenerationLimiter } from "../middleware/rateLimit";
-import { validateUUID } from "../middleware/validate";
 import {
 	createCreation,
 	deleteCreation,
@@ -124,10 +123,6 @@ router.post(
 			const { name, intentDescription, config, imageUrl } = req.body;
 			const userId = requireUserId(req);
 
-			if (!name || !config) {
-				throw new APIError("Missing required fields", 400);
-			}
-
 			const creation = await createCreation(userId, {
 				name,
 				intentDescription,
@@ -224,7 +219,6 @@ router.delete(
 			const { id } = req.params;
 			const userId = requireUserId(req);
 
-			validateUUID(id, "creation ID");
 			const success = await deleteCreation(id as UUID, userId);
 
 			if (!success) {
