@@ -25,7 +25,7 @@ app.use(
 		// Auth is handled by authMiddleware which verifies the JWT. The validator
 		// only checks header presence, which is redundant and weaker
 		validateSecurity: false,
-		ignorePaths: /^\/api-docs/,
+		ignorePaths: /^\/api-docs/, // covers /api-docs and /api-docs.json
 	}),
 );
 
@@ -46,6 +46,8 @@ app.use(
 		],
 	}),
 );
+
+app.get("/api-docs.json", (_req, res) => res.json(swaggerSpec));
 
 app.get("/health", (_req, res) => {
 	res.json({ status: "OK", timestamp: new Date() });

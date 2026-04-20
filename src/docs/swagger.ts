@@ -7,6 +7,7 @@ import {
 	AuthResponseSchema,
 	CreateCreationInputSchema,
 	CreationSchema,
+	ErrorResponseSchema,
 	GenerateImageInputSchema,
 	GenerateImageResponseSchema,
 	LoginInputSchema,
@@ -20,6 +21,10 @@ import {
 } from "../schemas";
 
 const registry = new OpenAPIRegistry();
+
+const errorContent = {
+	"application/json": { schema: ErrorResponseSchema },
+};
 
 registry.registerComponent("securitySchemes", "bearerAuth", {
 	type: "http",
@@ -44,9 +49,9 @@ registry.registerPath({
 			description: "User registered",
 			content: { "application/json": { schema: AuthResponseSchema } },
 		},
-		400: { description: "Validation error" },
-		409: { description: "Email already registered" },
-		429: { description: "Too many requests" },
+		400: { description: "Validation error", content: errorContent },
+		409: { description: "Email already registered", content: errorContent },
+		429: { description: "Too many requests", content: errorContent },
 	},
 });
 
@@ -66,8 +71,8 @@ registry.registerPath({
 			description: "Login successful",
 			content: { "application/json": { schema: AuthResponseSchema } },
 		},
-		401: { description: "Invalid email or password" },
-		429: { description: "Too many requests" },
+		401: { description: "Invalid email or password", content: errorContent },
+		429: { description: "Too many requests", content: errorContent },
 	},
 });
 
@@ -94,7 +99,10 @@ registry.registerPath({
 				},
 			},
 		},
-		401: { description: "Invalid or expired refresh token" },
+		401: {
+			description: "Invalid or expired refresh token",
+			content: errorContent,
+		},
 	},
 });
 
@@ -191,8 +199,8 @@ registry.registerPath({
 			description: "The piece",
 			content: { "application/json": { schema: PieceSchema } },
 		},
-		400: { description: "Invalid ID format" },
-		404: { description: "Piece not found" },
+		400: { description: "Invalid ID format", content: errorContent },
+		404: { description: "Piece not found", content: errorContent },
 	},
 });
 
@@ -216,9 +224,9 @@ registry.registerPath({
 				"application/json": { schema: GenerateImageResponseSchema },
 			},
 		},
-		400: { description: "Missing config" },
-		401: { description: "Unauthorized" },
-		429: { description: "Rate limit exceeded" },
+		400: { description: "Missing config", content: errorContent },
+		401: { description: "Unauthorized", content: errorContent },
+		429: { description: "Rate limit exceeded", content: errorContent },
 	},
 });
 
@@ -241,8 +249,8 @@ registry.registerPath({
 			description: "Creation saved",
 			content: { "application/json": { schema: CreationSchema } },
 		},
-		400: { description: "Missing required fields" },
-		401: { description: "Unauthorized" },
+		400: { description: "Missing required fields", content: errorContent },
+		401: { description: "Unauthorized", content: errorContent },
 	},
 });
 
@@ -262,8 +270,8 @@ registry.registerPath({
 				"application/json": { schema: z.array(CreationSchema) },
 			},
 		},
-		401: { description: "Unauthorized" },
-		403: { description: "Forbidden" },
+		401: { description: "Unauthorized", content: errorContent },
+		403: { description: "Forbidden", content: errorContent },
 	},
 });
 
@@ -285,8 +293,11 @@ registry.registerPath({
 				},
 			},
 		},
-		401: { description: "Unauthorized" },
-		404: { description: "Creation not found or unauthorized" },
+		401: { description: "Unauthorized", content: errorContent },
+		404: {
+			description: "Creation not found or unauthorized",
+			content: errorContent,
+		},
 	},
 });
 
@@ -310,9 +321,9 @@ registry.registerPath({
 				"application/json": { schema: TourGuideResponseSchema },
 			},
 		},
-		400: { description: "Message cannot be empty" },
-		401: { description: "Unauthorized" },
-		429: { description: "Rate limit — wait 30 seconds" },
+		400: { description: "Message cannot be empty", content: errorContent },
+		401: { description: "Unauthorized", content: errorContent },
+		429: { description: "Rate limit — wait 30 seconds", content: errorContent },
 	},
 });
 

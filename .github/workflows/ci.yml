@@ -31,6 +31,11 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Check openapi.json is up to date
+        run: |
+          npm run generate:spec
+          git diff --exit-code openapi.json || (echo "openapi.json is out of date — run npm run generate:spec and commit the result" && exit 1)
+
       - name: Pull Vercel environment
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
